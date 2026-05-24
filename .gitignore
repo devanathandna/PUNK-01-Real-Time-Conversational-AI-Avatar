@@ -1,0 +1,30 @@
+# Ignore unwanted folders
+Backend_Host/
+frontend_aiv/
+Testing_AIVA/
+
+# Dependencies
+**/node_modules/
+
+# Build files
+**/dist/
+**/build/
+
+# Environment variables
+**/.env
+**/.env.*
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+
+# Python cache
+__pycache__/
+*.pyc
