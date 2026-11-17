@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useAnimationContext } from "../AnimationContext";
 
-const WS_URL = "ws://localhost:8000/ws";
+const WS_URL = "wss://punk-01-real-time-conversational-ai.onrender.com/ws";
 
 const LANG_STYLE_MAP = {
   en: "english",
