@@ -167,11 +167,13 @@ chroma_db/
 *.chroma
 
 # Vector embeddings and indices (can be regenerated)
-
+# IMPORTANT: FAISS index files are ALLOWED for deployment
+# !rag_faiss/embeddings/*.bin
+# !rag_faiss/embeddings/*.pkl
 
 # Model files (usually large)
 models/
-*.bin
+# *.bin  # Commented out - we need FAISS .bin files
 *.model
 *.pt
 *.pth
