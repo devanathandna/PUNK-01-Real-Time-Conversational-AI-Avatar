@@ -1,0 +1,127 @@
+[
+  {
+    "question": "What is Sri Eshwar College of Engineering?",
+    "ground_truth": "Sri Eshwar College of Engineering (SECE) is an autonomous engineering institution approved by AICTE and affiliated to Anna University. It is accredited by NAAC with A++ grade and NBA for multiple programs.",
+    "contexts": ["Overview.txt"]
+  },
+  {
+    "question": "Where is the college located?",
+    "ground_truth": "Sri Eshwar College of Engineering is located in Coimbatore, Tamil Nadu, India.",
+    "contexts": ["Overview.txt"]
+  },
+  {
+    "question": "What departments are available?",
+    "ground_truth": "The college offers departments in Computer Science and Engineering, Electronics and Communication Engineering, Electrical and Electronics Engineering, Mechanical Engineering, Civil Engineering, Artificial Intelligence and Data Science, and more.",
+    "contexts": ["Departments.txt"]
+  },
+  {
+    "question": "What are the hostel facilities?",
+    "ground_truth": "The college provides separate hostel facilities for boys and girls with amenities like WiFi, mess, recreational facilities, and 24/7 security.",
+    "contexts": ["Hostel.txt"]
+  },
+  {
+    "question": "What is the fee structure for B.E CSE?",
+    "ground_truth": "The fee structure varies by program. For B.E Computer Science and Engineering, the annual tuition fee is approximately 1.5 lakhs per year.",
+    "contexts": ["Fees_Structure.txt"]
+  },
+  {
+    "question": "What are the cutoff marks for admission?",
+    "ground_truth": "Cutoff marks vary by category and program. For CSE, the general category cutoff is typically around 180-190 marks in TNEA counseling.",
+    "contexts": ["Cutoffs.txt"]
+  },
+  {
+    "question": "Does the college offer placements?",
+    "ground_truth": "Yes, the college has a dedicated placement cell with strong industry connections. Top recruiters include TCS, Infosys, Wipro, Cognizant, and various startups.",
+    "contexts": ["Achievements.txt"]
+  },
+  {
+    "question": "What higher education support is available?",
+    "ground_truth": "The college provides guidance for higher education including GRE, GATE, TOEFL coaching and assistance with applications to universities abroad.",
+    "contexts": ["Higher_Education.txt"]
+  },
+  {
+    "question": "Is the college NAAC accredited?",
+    "ground_truth": "Yes, Sri Eshwar College of Engineering is accredited by NAAC with A++ grade, demonstrating excellence in academic standards.",
+    "contexts": ["Overview.txt"]
+  },
+  {
+    "question": "What are the college timings?",
+    "ground_truth": "The college operates from 8:30 AM to 4:30 PM on weekdays with classes scheduled in multiple sessions throughout the day.",
+    "contexts": ["Overview.txt"]
+  },
+  {
+    "question": "Are there any research facilities?",
+    "ground_truth": "Yes, the college has well-equipped laboratories and research centers for students and faculty to pursue innovative projects and research work.",
+    "contexts": ["Departments.txt", "Achievements.txt"]
+  },
+  {
+    "question": "What sports facilities are available?",
+    "ground_truth": "The college provides sports facilities including indoor and outdoor courts for basketball, volleyball, cricket, badminton, and a well-equipped gymnasium.",
+    "contexts": ["Overview.txt"]
+  },
+  {
+    "question": "How many students are enrolled?",
+    "ground_truth": "The college has an enrollment of approximately 3000+ students across various undergraduate and postgraduate programs.",
+    "contexts": ["Dataset.txt"]
+  },
+  {
+    "question": "What is the faculty student ratio?",
+    "ground_truth": "The college maintains a healthy faculty-student ratio of approximately 1:15, ensuring personalized attention and quality education.",
+    "contexts": ["Dataset.txt"]
+  },
+  {
+    "question": "Are internships mandatory?",
+    "ground_truth": "Yes, internships are part of the curriculum. Students are encouraged to complete industry internships during their final year to gain practical experience.",
+    "contexts": ["Achievements.txt"]
+  },
+  {
+    "question": "What is the average package in placements?",
+    "ground_truth": "The average placement package is around 4-5 LPA, with the highest package reaching up to 40+ LPA for top performers.",
+    "contexts": ["Achievements.txt"]
+  },
+  {
+    "question": "Does the college have a library?",
+    "ground_truth": "Yes, the college has a central library with a vast collection of books, journals, e-resources, and digital library facilities with 24/7 access.",
+    "contexts": ["Overview.txt"]
+  },
+  {
+    "question": "What technical clubs are available?",
+    "ground_truth": "The college hosts various technical clubs including coding clubs, robotics club, AI/ML club, IoT club, and departmental associations for student engagement.",
+    "contexts": ["Achievements.txt"]
+  },
+  {
+    "question": "Is transport facility available?",
+    "ground_truth": "Yes, the college provides transportation facility with buses covering various routes across Coimbatore and nearby areas.",
+    "contexts": ["Overview.txt"]
+  },
+  {
+    "question": "What scholarships are available?",
+    "ground_truth": "The college offers merit-based scholarships, government scholarships, and financial aid for economically disadvantaged students based on performance and need.",
+    "contexts": ["Fees_Structure.txt"]
+  },
+  {
+    "question": "How do I apply for admission?",
+    "ground_truth": "Admissions are done through TNEA counseling for undergraduate programs. Students need to appear for the 12th board exams and register for TNEA counseling.",
+    "contexts": ["Cutoffs.txt"]
+  },
+  {
+    "question": "What entrepreneurship support exists?",
+    "ground_truth": "The college has an innovation and entrepreneurship cell that supports student startups with mentorship, incubation facilities, and funding opportunities.",
+    "contexts": ["Achievements.txt"]
+  },
+  {
+    "question": "Are there industry collaborations?",
+    "ground_truth": "Yes, the college has MoUs with leading companies like TCS, Infosys, Bosch, and various tech firms for internships, projects, and placements.",
+    "contexts": ["Achievements.txt"]
+  },
+  {
+    "question": "What extracurricular activities are offered?",
+    "ground_truth": "The college offers cultural events, technical symposiums, sports competitions, NSS activities, and various club activities throughout the year.",
+    "contexts": ["Overview.txt"]
+  },
+  {
+    "question": "Is there WiFi on campus?",
+    "ground_truth": "Yes, the entire campus including hostels is WiFi-enabled with high-speed internet connectivity for academic and research purposes.",
+    "contexts": ["Hostel.txt", "Overview.txt"]
+  }
+]

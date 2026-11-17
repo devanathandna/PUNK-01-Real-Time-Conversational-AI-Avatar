@@ -1,19 +1,78 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useAnimations, useFBX, useGLTF } from '@react-three/drei';
-import { Box3, Vector3, LoopOnce } from 'three';
+import { Box3, Vector3, Quaternion, LoopOnce } from 'three';
 import { SkeletonUtils } from 'three-stdlib';
 import { useAnimationContext } from '../AnimationContext';
 
-function renameClip(clip, name) {
-  const nextClip = clip.clone();
-  nextClip.name = name;
-  return nextClip;
+const REF_CLIP = 'BreathingIdle';
+
+const isHips = (trackName) => /hips\.(position|quaternion)$/i.test(trackName);
+
+function findHipsTracks(clip) {
+  return {
+    pos:  clip.tracks.find((t) => /hips\.position$/i.test(t.name)),
+    quat: clip.tracks.find((t) => /hips\.quaternion$/i.test(t.name)),
+  };
+}
+
+/**
+ * Clones every clip and:
+ *  - drops scale tracks and non-hips position tracks (Mixamo cm units can stretch the mesh)
+ *  - aligns hips rotation/position to the reference (idle) clip's first frame,
+ *    so every clip shares the same root orientation.
+ */
+function prepareClips(rawClips) {
+  const ref = rawClips.find((c) => c.name === REF_CLIP);
+  const refHips = ref ? findHipsTracks(ref) : {};
+  const refQ0 = refHips.quat ? new Quaternion().fromArray(refHips.quat.values, 0) : null;
+  const refP0 = refHips.pos  ? new Vector3().fromArray(refHips.pos.values, 0)     : null;
+
+  return rawClips.map((src) => {
+    const clip = src.clone(); // clones tracks + values, original FBX stays untouched
+
+    clip.tracks = clip.tracks.filter((t) => {
+      if (t.name.endsWith('.scale')) return false;
+      if (t.name.endsWith('.position') && !isHips(t.name)) return false;
+      return true;
+    });
+
+    if (clip.name === REF_CLIP || !refQ0) return clip;
+
+    const { pos, quat } = findHipsTracks(clip);
+    if (!quat) return clip;
+
+    const q0    = new Quaternion().fromArray(quat.values, 0);
+    const delta = refQ0.clone().multiply(q0.clone().invert()); // delta * q0 = refQ0
+
+    // Debug: how far off was this clip from idle? (remove later)
+    const deg = (2 * Math.acos(Math.min(1, Math.abs(delta.w))) * 180) / Math.PI;
+    console.log(`[Avatar] ${clip.name}: hips orientation offset vs idle = ${deg.toFixed(1)}°`);
+
+    const q = new Quaternion();
+    for (let i = 0; i < quat.values.length; i += 4) {
+      q.fromArray(quat.values, i).premultiply(delta).toArray(quat.values, i);
+    }
+
+    if (pos && refP0) {
+      const p0 = new Vector3().fromArray(pos.values, 0);
+      const p  = new Vector3();
+      for (let i = 0; i < pos.values.length; i += 3) {
+        p.fromArray(pos.values, i).sub(p0).applyQuaternion(delta).add(refP0).toArray(pos.values, i);
+      }
+    }
+    return clip;
+  });
+}
+
+function rename(clip, name) {
+  const c = clip.clone();
+  c.name = name;
+  return c;
 }
 
 export function Avatar(props) {
   const targetHeight = 3.4;
 
-  // ── Load all FBXs ──────────────────────────────────────────────────────────
   const breathingIdleFbx = useFBX('/animations/BreathingIdle.fbx');
   const acknowledgingFbx = useFBX('/animations/Acknowledging.fbx');
   const talkingFbx       = useFBX('/animations/Talking.fbx');
@@ -22,7 +81,10 @@ export function Avatar(props) {
   const { scene } = useGLTF('/models/shalaka.glb');
 
   const { animations } = useAnimationContext();
-  const isPlayingEmotionsRef = useRef(false);
+  // Stable key: a new array identity with the same content must NOT restart the sequence
+  const animationKey = (animations ?? []).join('|');
+
+  const currentRef = useRef(null); // action currently driving the skeleton
 
   // ── Clone + scale model ────────────────────────────────────────────────────
   const { avatar, offset, modelScale } = useMemo(() => {
@@ -33,7 +95,7 @@ export function Avatar(props) {
 
     clonedAvatar.traverse((child) => {
       if (child.isMesh || child.isSkinnedMesh) {
-        child.castShadow    = true;
+        child.castShadow = true;
         child.receiveShadow = true;
         child.frustumCulled = false;
       }
@@ -44,15 +106,15 @@ export function Avatar(props) {
     bounds.getCenter(center);
     bounds.getSize(size);
 
-    const scaleFactor = size.y > 0 ? targetHeight / size.y : 1;
+    const s = size.y > 0 ? targetHeight / size.y : 1;
     return {
-      avatar:     clonedAvatar,
-      offset:     [-center.x * scaleFactor, -bounds.min.y * scaleFactor, -center.z * scaleFactor],
-      modelScale: scaleFactor,
+      avatar: clonedAvatar,
+      offset: [-center.x * s, -bounds.min.y * s, -center.z * s],
+      modelScale: s,
     };
   }, [scene]);
 
-  // ── Build animation clip list ──────────────────────────────────────────────
+  // ── Build + normalize clips ────────────────────────────────────────────────
   const allAnimations = useMemo(() => {
     const fbxMap = [
       [breathingIdleFbx, 'BreathingIdle'],
@@ -61,71 +123,71 @@ export function Avatar(props) {
       [talkingTwoFbx,    'Talking2'],
       [headNodYesFbx,    'HeadNodYes'],
     ];
-    return fbxMap
+    const renamed = fbxMap
       .filter(([fbx]) => fbx.animations?.[0])
-      .map(([fbx, name]) => renameClip(fbx.animations[0], name));
+      .map(([fbx, name]) => rename(fbx.animations[0], name));
+    return prepareClips(renamed);
   }, [breathingIdleFbx, acknowledgingFbx, talkingFbx, talkingTwoFbx, headNodYesFbx]);
 
   const { actions, mixer } = useAnimations(allAnimations, avatar);
 
-  // ── Start BreathingIdle once actions are ready ─────────────────────────────
-  useEffect(() => {
-    if (!actions?.BreathingIdle) return;
-    actions.BreathingIdle.reset().fadeIn(0.5).play();
-  }, [actions]);
-
-  // ── Emotion animation sequencer ────────────────────────────────────────────
+  // ── Single sequencer: idle <-> emotion clips, always cross-faded ───────────
   useEffect(() => {
     if (!actions || !mixer) return;
 
-    if (animations.length === 0) {
-      // ── Return to BreathingIdle ─────────────────────────────────────────
-      isPlayingEmotionsRef.current = false;
-      Object.values(actions).forEach((a) => {
-        if (a !== actions.BreathingIdle && a.isRunning()) a.fadeOut(0.3);
-      });
-      actions.BreathingIdle?.reset().fadeIn(0.5).play();
+    const idle = actions.BreathingIdle;
+    const sequence = animationKey
+      ? animationKey.split('|').filter((n) => actions[n])
+      : [];
+
+    // Cross-fade keeps total weight == 1, so the bind pose never leaks through
+    const switchTo = (next, fade = 0.35) => {
+      const prev = currentRef.current;
+      if (prev === next) {
+        next.reset().play();
+        return;
+      }
+      next.reset().setEffectiveWeight(1).setEffectiveTimeScale(1).play();
+      if (prev) prev.crossFadeTo(next, fade, false);
+      else next.fadeIn(fade);
+      currentRef.current = next;
+    };
+
+    // No emotions → back to idle
+    if (sequence.length === 0) {
+      if (idle) switchTo(idle, 0.5);
       return;
     }
 
-    // ── Play emotion sequence, cycling until TTS ends ──────────────────────
-    isPlayingEmotionsRef.current = true;
-    let stepIndex = 0;
+    let active = true;
+    let step = 0;
 
-    const playStep = () => {
-      if (!isPlayingEmotionsRef.current) return;
-      const name   = animations[stepIndex % animations.length];
-      stepIndex++;
-      const action = actions[name];
-      if (!action) { playStep(); return; } // skip unknown
-
-      action.reset();
+    const playNext = () => {
+      if (!active) return;
+      const action = actions[sequence[step % sequence.length]];
+      step++;
       action.setLoop(LoopOnce, 1);
       action.clampWhenFinished = true;
-      action.fadeIn(0.3).play();
+      switchTo(action);
     };
 
     const onFinished = (e) => {
-      if (!isPlayingEmotionsRef.current) return;
-      e.action.fadeOut(0.3);
-      playStep();
+      if (e.action !== currentRef.current) return; // ignore clips that are fading out
+      playNext();
     };
 
     mixer.addEventListener('finished', onFinished);
-    actions.BreathingIdle?.fadeOut(0.5);
-    playStep();
+    playNext();
 
     return () => {
-      isPlayingEmotionsRef.current = false;
+      active = false;
       mixer.removeEventListener('finished', onFinished);
     };
-  }, [animations, actions, mixer]);
+  }, [animationKey, actions, mixer]);
 
   return (
     <group {...props} dispose={null}>
-      {/* Wrapper group to handle coordinate system corrections */}
       <group rotation={[0, -Math.PI / 2, 0]}>
-        {/* Additional rotation to fix FBX/GLB coordinate mismatch */}
         <group rotation={[-Math.PI / 2, 0, 96]}>
           <group position={offset} scale={modelScale}>
             <primitive object={avatar} />

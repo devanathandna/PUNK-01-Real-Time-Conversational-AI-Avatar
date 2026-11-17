@@ -34,7 +34,7 @@ export function ChatInterface({ onResponse }) {
   const [input, setInput] = useState("");
   const [connected, setConnected] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const [enableTTS, setEnableTTS] = useState(false);
+  const [enableTTS, setEnableTTS] = useState(true);
   const [language, setLanguage] = useState("en");
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingText, setStreamingText] = useState("");
@@ -416,18 +416,6 @@ export function ChatInterface({ onResponse }) {
             ...(m.isError ? { backgroundColor: "#ef4444" } : {})
           }}>
             <div>{m.text}</div>
-            {m.emotion && m.emotion !== "none" && (
-              <span style={styles.emotion}>{m.emotion === "happy" ? " 😊" : " 😔"}</span>
-            )}
-            {m.audioData && (
-              <button 
-                style={styles.audioPlayButton} 
-                onClick={() => playAudioFromBase64(m.audioData)}
-                title="Play audio response"
-              >
-                🔊
-              </button>
-            )}
           </div>
         ))}
         
@@ -448,29 +436,6 @@ export function ChatInterface({ onResponse }) {
         <div ref={messagesEndRef} />
       </div>
 
-      <div style={styles.controls}>
-        <label style={styles.ttsToggle}>
-          <input 
-            type="checkbox" 
-            checked={enableTTS}
-            onChange={(e) => setEnableTTS(e.target.checked)}
-            style={styles.checkbox}
-          />
-          <span style={styles.ttsLabel}>🔊 TTS</span>
-        </label>
-        <div style={styles.langButtons}>
-          {[{ code: "en", label: "English" }, { code: "ta", label: "Tamil" }, { code: "hi", label: "Hindi" }].map(({ code, label }) => (
-            <button
-              key={code}
-              style={{ ...styles.langButton, ...(language === code ? styles.langButtonActive : {}) }}
-              onClick={() => setLanguage(code)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
-
       <div style={styles.inputRow}>
         <button 
           style={{
@@ -489,7 +454,7 @@ export function ChatInterface({ onResponse }) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKey}
-          placeholder="Ask about Deavanathan…"
+          placeholder="Ask Anything related to SECE…"
         />
         <button style={styles.button} onClick={send} disabled={!connected}>
           Send
@@ -502,63 +467,72 @@ export function ChatInterface({ onResponse }) {
 const styles = {
   container: {
     position: "fixed",
-    bottom: 20,
-    right: 20,
-    width: 370,
-    maxHeight: "60vh",
+    bottom: 30,
+    right: 30,
+    width: 420,
+    maxHeight: "70vh",
     display: "flex",
     flexDirection: "column",
-    backgroundColor: "#1e1e2e",
-    borderRadius: 12,
-    boxShadow: "0 4px 24px rgba(0,0,0,0.4)",
+    background: "rgba(15, 15, 25, 0.95)",
+    backdropFilter: "blur(20px)",
+    borderRadius: 20,
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5), 0 0 1px rgba(255, 255, 255, 0.2)",
     overflow: "hidden",
-    fontFamily: "'Segoe UI', sans-serif",
+    fontFamily: "'Inter', 'Segoe UI', sans-serif",
     zIndex: 1000,
   },
   header: {
-    padding: "12px 16px",
+    padding: "16px 20px",
     fontWeight: 600,
-    fontSize: 16,
+    fontSize: 18,
     color: "#fff",
-    backgroundColor: "#2a2a3d",
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     display: "flex",
     alignItems: "center",
-    gap: 8,
+    gap: 10,
+    letterSpacing: "0.3px",
   },
   dot: {
-    width: 8,
-    height: 8,
+    width: 10,
+    height: 10,
     borderRadius: "50%",
     display: "inline-block",
   },
   messages: {
     flex: 1,
     overflowY: "auto",
-    padding: 12,
+    padding: 20,
     display: "flex",
     flexDirection: "column",
-    gap: 8,
-    maxHeight: "40vh",
+    gap: 12,
+    maxHeight: "45vh",
+    background: "rgba(20, 20, 30, 0.3)",
   },
   userBubble: {
     alignSelf: "flex-end",
-    backgroundColor: "#3b82f6",
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     color: "#fff",
-    padding: "8px 12px",
-    borderRadius: "12px 12px 0 12px",
-    maxWidth: "80%",
-    fontSize: 14,
+    padding: "12px 16px",
+    borderRadius: "18px 18px 4px 18px",
+    maxWidth: "75%",
+    fontSize: 15,
     wordBreak: "break-word",
+    boxShadow: "0 4px 12px rgba(102, 126, 234, 0.3)",
+    lineHeight: "1.5",
   },
   assistantBubble: {
     alignSelf: "flex-start",
-    backgroundColor: "#2a2a3d",
-    color: "#e0e0e0",
-    padding: "8px 12px",
-    borderRadius: "12px 12px 12px 0",
-    maxWidth: "80%",
-    fontSize: 14,
+    background: "rgba(45, 45, 65, 0.9)",
+    color: "#e8e8e8",
+    padding: "12px 16px",
+    borderRadius: "18px 18px 18px 4px",
+    maxWidth: "75%",
+    fontSize: 15,
     wordBreak: "break-word",
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+    border: "1px solid rgba(255, 255, 255, 0.05)",
+    lineHeight: "1.5",
   },
   emotion: { marginLeft: 4 },
   audioPlayButton: {
@@ -573,11 +547,12 @@ const styles = {
     transition: "opacity 0.2s",
   },
   controls: {
-    padding: "8px 16px",
-    borderTop: "1px solid #333",
+    padding: "12px 20px",
+    borderTop: "1px solid rgba(255, 255, 255, 0.08)",
     display: "flex",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
+    background: "rgba(20, 20, 30, 0.5)",
   },
   ttsToggle: {
     display: "flex",
@@ -595,65 +570,80 @@ const styles = {
   },
   inputRow: {
     display: "flex",
-    borderTop: "1px solid #333",
+    padding: "12px",
+    borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+    background: "rgba(20, 20, 30, 0.5)",
+    gap: 8,
   },
   recordButton: {
     border: "none",
-    padding: "10px 12px",
+    padding: "12px 14px",
+    borderRadius: 12,
     cursor: "pointer",
-    fontSize: 16,
+    fontSize: 20,
     color: "#fff",
-    transition: "background-color 0.2s",
+    transition: "all 0.3s",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    minWidth: 44,
+    minWidth: 48,
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
   },
   input: {
     flex: 1,
-    padding: "10px 12px",
-    border: "none",
-    outline: "none",
-    fontSize: 14,
-    backgroundColor: "#16161e",
+    padding: "12px 16px",
+    borderRadius: 12,
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    background: "rgba(30, 30, 45, 0.8)",
     color: "#fff",
+    fontSize: 15,
+    outline: "none",
+    transition: "all 0.3s",
   },
   button: {
-    padding: "10px 18px",
+    padding: "12px 20px",
     border: "none",
-    backgroundColor: "#3b82f6",
+    borderRadius: 12,
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     color: "#fff",
+    fontSize: 15,
     fontWeight: 600,
     cursor: "pointer",
-    fontSize: 14,
+    transition: "all 0.3s",
+    boxShadow: "0 4px 12px rgba(102, 126, 234, 0.4)",
   },
   loadingIndicator: {
     alignSelf: "flex-start",
-    backgroundColor: "#2a2a3d",
-    color: "#9ca3af",
-    padding: "8px 12px",
-    borderRadius: "12px 12px 12px 0",
-    fontSize: 12,
+    background: "rgba(45, 45, 65, 0.7)",
+    color: "#b0b0b0",
+    padding: "10px 14px",
+    borderRadius: "18px 18px 18px 4px",
+    fontSize: 13,
     fontStyle: "italic",
-    opacity: 0.8,
+    opacity: 0.9,
   },
   langButtons: {
     display: "flex",
-    gap: 4,
+    gap: 8,
+    background: "rgba(30, 30, 45, 0.6)",
+    padding: "6px",
+    borderRadius: 12,
   },
   langButton: {
-    padding: "3px 8px",
-    border: "1px solid #444",
-    borderRadius: 4,
-    backgroundColor: "transparent",
-    color: "#9ca3af",
-    fontSize: 11,
+    padding: "6px 14px",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    borderRadius: 8,
+    background: "transparent",
+    color: "#b0b0b0",
+    fontSize: 13,
+    fontWeight: 500,
     cursor: "pointer",
-    transition: "all 0.2s",
+    transition: "all 0.3s",
   },
   langButtonActive: {
-    backgroundColor: "#3b82f6",
-    borderColor: "#3b82f6",
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    borderColor: "transparent",
     color: "#fff",
+    boxShadow: "0 2px 8px rgba(102, 126, 234, 0.4)",
   },
 };

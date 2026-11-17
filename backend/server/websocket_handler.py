@@ -2,10 +2,12 @@ import json
 import traceback
 import base64
 import time
+import logging
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from agent.groq_llama_agent import get_agent_response, get_agent_response_streaming  # Changed to Groq Llama
+from agent.groq_llama_agent import get_agent_response, get_agent_response_streaming
 from audio.manager import get_audio_manager
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 audio_manager = get_audio_manager()
 
@@ -41,29 +43,37 @@ async def websocket_endpoint(ws: WebSocket):
     print("[WS] Client connected")
     try:
         while True:
-            # Try to receive either text or binary data
+            # Receive message - let it fail naturally on disconnect
             try:
-                data = await ws.receive_text()
-                await handle_text_message(ws, data)
-            except:
-                # If text receive fails, try binary
+                # First try to receive as JSON (most common case)
+                message = await ws.receive_json()
+                await handle_json_message(ws, message)
+            except json.JSONDecodeError:
+                # If JSON fails, try raw text
                 try:
-                    binary_data = await ws.receive_bytes()
-                    await handle_binary_message(ws, binary_data)
-                except:
-                    # If both fail, try JSON message
-                    message = await ws.receive_json()
-                    await handle_json_message(ws, message)
+                    text_data = await ws.receive_text()
+                    await handle_text_message(ws, text_data)
+                except Exception as inner_e:
+                    # If both fail, log and continue
+                    print(f"[WS] Receive error: {inner_e}")
+                    continue
 
-    except WebSocketDisconnect:
-        print("[WS] Client disconnected")
+    except WebSocketDisconnect as e:
+        print(f"[WS] Client disconnected (code: {e.code})")
+    except RuntimeError as e:
+        # Handle "Cannot call receive once disconnect received" error
+        if "disconnect" in str(e).lower():
+            print(f"[WS] Connection already closed: {e}")
+        else:
+            traceback.print_exc()
     except Exception as e:
+        print(f"[WS] Unexpected error: {e}")
         traceback.print_exc()
         try:
             await ws.send_json({
                 "type": "error",
-                "response": f"Server error: {str(e)}", 
-                "emotion": "sad"
+                "response": "Server error. Connection closing.", 
+                "emotion": "none"
             })
         except Exception:
             pass
@@ -174,6 +184,8 @@ async def handle_text_query(ws: WebSocket, payload: dict):
             sentences = tts_processor.split_into_sentences(result["response"])
             
             for i, sentence in enumerate(sentences):
+                logger.info(f"[TTS] Sentence {i+1}/{len(sentences)}: '{sentence[:60]}...' ({len(sentence)} chars)")
+                
                 # We use process_text_to_audio to generate the audio block for this sentence
                 tts_result = await audio_manager.process_text_to_audio(
                     text=sentence,
@@ -194,11 +206,11 @@ async def handle_text_query(ws: WebSocket, payload: dict):
                 
             print(f"[WS] 🎉 Chunked audio generated {len(sentences)} chunks successfully!")
         except Exception as tts_error:
-            print(f"[WS] Edge TTS streaming error: {tts_error}")
+            print(f"[WS] TTS streaming error: {tts_error}")
             await ws.send_json({
                 "type": "error",
                 "response": "TTS backend failed",
-                "emotion": "sad"
+                "emotion": "Talking"
             })
     else:
         # Just text response

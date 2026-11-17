@@ -1,0 +1,61 @@
+================================================================================
+END-TO-END LATENCY METRICS
+================================================================================
+
+COMPONENT-WISE LATENCY:
+--------------------------------------------------------------------------------
+
+RAG Retrieval:
+  Count:   5 requests
+  Mean:    580.96 ms
+  Median:  522.95 ms
+  Min:     509.14 ms
+  Max:     813.92 ms
+  Stdev:   130.72 ms
+  P95:     813.92 ms
+  P99:     813.92 ms
+
+Agent (LLM):
+  Count:   5 requests
+  Mean:    1963.72 ms
+  Median:  2025.52 ms
+  Min:     1619.56 ms
+  Max:     2436.06 ms
+  Stdev:   333.56 ms
+  P95:     2436.06 ms
+  P99:     2436.06 ms
+
+TTS (Text-to-Speech):
+  Count:   5 requests
+  Mean:    1117.88 ms
+  Median:  199.89 ms
+  Min:     90.66 ms
+  Max:     4921.28 ms
+  Stdev:   2126.70 ms
+  P95:     4921.28 ms
+  P99:     4921.28 ms
+
+TTS TTFB (Time to First Byte):
+  Count:   1 requests
+  Mean:    4921.28 ms
+  Median:  4921.28 ms
+  Min:     4921.28 ms
+  Max:     4921.28 ms
+  Stdev:   0.00 ms
+  P95:     4921.28 ms
+  P99:     4921.28 ms
+
+================================================================================
+END-TO-END LATENCY:
+--------------------------------------------------------------------------------
+
+Text Input → Audio Output:
+  Count:   5 requests
+  Mean:    3662.76 ms
+  Median:  3084.61 ms
+  Min:     2275.75 ms
+  Max:     7081.23 ms
+  P95:     7081.23 ms
+  P99:     7081.23 ms
+
+================================================================================

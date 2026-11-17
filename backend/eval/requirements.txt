@@ -1,0 +1,20 @@
+# Evaluation Framework Requirements
+
+# RAGAS metrics
+ragas>=0.1.0
+datasets>=2.14.0
+
+# LLM and embeddings for RAGAS
+langchain>=0.1.0
+langchain-community>=0.0.10
+openai>=1.0.0
+
+# Data processing
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Sentence transformers for embeddings
+sentence-transformers>=2.2.0
+
+# Additional utilities
+tqdm>=4.65.0

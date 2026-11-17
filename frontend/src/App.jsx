@@ -2,7 +2,7 @@ import React from "react";
 import { Canvas } from "@react-three/fiber";
 import { Experience } from "./components/Experience";
 import { ChatInterface } from "./components/ChatInterface";
-import { AnimationProvider } from "./AnimationContext";
+import { AnimationProvider, useAnimationContext } from "./AnimationContext";
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {

@@ -1,5 +1,5 @@
 fastapi
-deepgram-sdk
+# deepgram-sdk
 uvicorn[standard]
 websockets
 python-dotenv

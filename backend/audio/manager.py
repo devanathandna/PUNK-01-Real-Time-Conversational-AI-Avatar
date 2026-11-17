@@ -6,7 +6,7 @@ import json
 import logging
 from typing import Dict, Any, Optional, Tuple
 from .stt import get_stt_processor
-from .tts import get_tts_processor
+from .groq_tts import GroqTTSProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +14,12 @@ class AudioManager:
     def __init__(self):
         """Initialize audio manager with STT and TTS processors"""
         self.stt_processor = get_stt_processor()
-        self.tts_processor = get_tts_processor()
+        try:
+            self.tts_processor = GroqTTSProcessor()
+            logger.info("✅ Using Groq TTS (Orpheus v1)")
+        except Exception as e:
+            logger.error(f"Failed to init Groq TTS: {e}")
+            raise
         
     async def process_audio_to_text(
         self, 
@@ -97,7 +102,10 @@ class AudioManager:
             result = await self.tts_processor.synthesize_speech(text, language, voice, emotion)
             
             if result["success"]:
-                logger.info(f"TTS successful: {result['size']} bytes, {result['format']} format")
+                # Handle both 'size' and 'duration_ms' keys
+                size = result.get('size') or len(result.get('audio_data', b''))
+                fmt = result.get('format', 'wav')
+                logger.info(f"TTS successful: {size} bytes, {fmt} format")
             else:
                 logger.error(f"TTS failed: {result.get('error', 'Unknown error')}")
                 

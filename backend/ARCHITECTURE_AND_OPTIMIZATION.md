@@ -107,7 +107,7 @@ The real performance win isn't just fast component execution—it's **parallel p
 **Purpose:** Convert user's spoken audio to text with high accuracy and low latency
 
 **Technical Specifications:**
-\n\n**Why Groq Whisper instead of alternatives?**
+**Why Groq Whisper instead of alternatives?**
 
 | Provider | Model | Latency | Cost | Accuracy | Notes |
 |----------|-------|---------|------|----------|-------|
@@ -117,9 +117,9 @@ The real performance win isn't just fast component execution—it's **parallel p
 | OpenAI | Whisper API | 5000ms | $0.02/min | 95% | Slower but same price |
 | AWS | Transcribe | 2000ms | $0.0001/sec | 93% | Cheaper but less accurate |
 
-Groq provides the best latency-to-cost ratio. Their API runs Whisper on specialized Groq LPU (Language Processing Unit) hardware optimized for low-latency inference.\n\n**Implementation with Groq SDK:**\n\n\n\n**Language Handling - Why No Auto-Detection?** Whisper can automatically detect the input language, but this adds significant latency: the API must analyze the audio spectral characteristics and compare against language models for all 100+ supported languages. This adds 200-400ms overhead. Instead, Chopper requires the frontend to specify the language:\n\n\n\n**Deep STT Performance Analysis:**\n\nWhisper's latency breakdown (from Groq's profiling):\n\n\n\nNotably, most of the latency (1200ms) is transformer inference—the actual speech recognition computation. The API overhead (network + formatting) is only ~250ms, while Groq's hardware acceleration keeps the computation efficient."}}]
+Groq provides the best latency-to-cost ratio. Their API runs Whisper on specialized Groq LPU (Language Processing Unit) hardware optimized for low-latency inference.\n\n**Implementation with Groq SDK:**\n**Language Handling - Why No Auto-Detection?** Whisper can automatically detect the input language, but this adds significant latency: the API must analyze the audio spectral characteristics and compare against language models for all 100+ supported languages. This adds 200-400ms overhead. Instead, Chopper requires the frontend to specify the language:\n\n\n\n**Deep STT Performance Analysis:**\n\nWhisper's latency breakdown (from Groq's profiling):\n\n\n\nNotably, most of the latency (1200ms) is transformer inference—the actual speech recognition computation. The API overhead (network + formatting) is only ~250ms, while Groq's hardware acceleration keeps the computation efficient."
 
-}
+
 
 For ambiguous or unclear transcriptions, Chopper can optionally use Groq's Llama model for post-processing corrections. This adds 50-100ms but is only used for edge cases with confidence scores below 0.85.
 
@@ -164,11 +164,12 @@ Why this works: Gemini LLM filters bad matches anyway in prompt engineering
 Cost savings: More queries per second on same hardware
 python
 # File: agent/groq_llama_agent.py
-
+"""
 async def get_agent_response_streaming(
     query: str,
     language: str = "en"
 ) -> AsyncGenerator[str, None]:
+"""
     """
     Stream response from Gemini 2.5 Flash
     
